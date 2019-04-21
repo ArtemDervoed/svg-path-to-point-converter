@@ -6,21 +6,24 @@ class LoaderSVGPage extends React.PureComponent {
     super();
     this.preview = null;
   }
+
   handleLoad = (e) => {
     const { files } = e.target;
     for (let i = 0; i < files.length; i++) {
     let file = files[i];
-
-    if (!file.type.startsWith('image/')) {
-        continue;
-      }
+    if (file.type.startsWith('image/')) {
       const img = document.createElement("img");
       img.classList.add("obj");
       img.file = file;
       this.preview.appendChild(img);
       const reader = new FileReader();
-      reader.onload = ((aImg) => { return (e) =>{ aImg.src = e.target.result; }; })(img);
+      reader.onload = (
+        (aImg) =>
+          (e) => {
+            aImg.src = e.target.result;
+          })(img);
       reader.readAsDataURL(file);
+      }
     }
   }
 
@@ -57,27 +60,6 @@ class LoaderSVGPage extends React.PureComponent {
       }
     return imageCoords;
   }
-
-  getArrayFromImage(img){
-		let imageCoords = [];
-		ctx.clearRect(0,0,size,size);
-    ctx.drawImage(img, 0, 0, size, size);
-    let data = ctx.getImageData(0, 0, size, size);
-    data = data.data;
-    for(var y = 0; y < size; y++) {
-      for(var x = 0; x < size; x++) {
-        var red = data[((size * y) + x) * 4];
-        var green = data[((size * y) + x) * 4 + 1];
-        var blue = data[((size * y) + x) * 4 + 2];
-        var alpha = data[((size * y) + x) * 4 + 3];
-	        if(alpha>0){
-	        	imageCoords.push([10*(x - size/2),10*(size/2 - y)]);
-	        }
-        }
-      }
-    return shuffle(fillUp(imageCoords, 1500));
-	}
-
 
   render() {
     return (
