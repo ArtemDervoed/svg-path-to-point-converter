@@ -3,6 +3,7 @@ import React, { Fragment } from 'react';
 import RendererMorph from '_components/RendererMorph';
 
 import { svgPathToPoints } from './svgPathToPoints';
+import { pathDataToPolys } from 'svg-path-to-polygons';
 
 class HomePage extends React.PureComponent {
   constructor() {
@@ -47,12 +48,12 @@ class HomePage extends React.PureComponent {
       if (i === 0) {
         points.push({ x: imagesCoord[i].x, y: imagesCoord[i].y });
       } else {
-        for (let j = 0; j < 50; j += 1) {
+        for (let j = 0; j <= 10; j += 1) {
           points.push(this.getQuadraticBezierXYatT(
             { x: imagesCoord[i].curve.x1, y: imagesCoord[i].curve.y1 },
             { x: imagesCoord[i].curve.x2, y: imagesCoord[i].curve.y2 },
             { x: imagesCoord[i].x, y: imagesCoord[i].y },
-            j / 50,
+            j / 10,
           ));
         }
       }
@@ -64,10 +65,10 @@ class HomePage extends React.PureComponent {
   handleSubmit = (e) => {
     e.preventDefault();
     const images = this.preview.childNodes;
-    const coordianates = [];
+    let coordianates = [];
     for (let i = 0; i < images.length; i += 1) {
       const svg = images[i].contentDocument.documentElement;
-      coordianates.push(this.convertBezierToPoints(svgPathToPoints(svg)));
+      coordianates = pathDataToPolys(svgPathToPoints(svg, { tolerance: 5, decimals: 1 }));
     }
     this.setState({ imagesCoord: coordianates, render: true });
   }

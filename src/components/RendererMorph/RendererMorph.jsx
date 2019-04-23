@@ -21,7 +21,7 @@ class RendererMorph extends React.Component {
     this.canvas.height = this.height;
     this.ctx = this.canvas.getContext('2d');
     this.pos = new Mouse(this.canvas);
-    this.mouse = new Ball(0, 0, 50, 'rgba(0,0,0,0)');
+    this.mouse = new Ball(0, 0, 20, 'rgba(255,0,255,1)');
     imagesCoord.forEach((path) => {
       this.balls.push(this.pushBalls(path));
     });
@@ -29,47 +29,16 @@ class RendererMorph extends React.Component {
     window.addEventListener('resize', this.handleResize);
   }
 
-  getQuadraticBezierXYatT = (startPt, controlPt, endPt, T) => {
-    const x = Math.pow(1 - T, 2) * startPt.x + 2 * (1 - T) * T * controlPt.x + Math.pow(T, 2) * endPt.x;// eslint-disable-line
-    const y = Math.pow(1 - T, 2) * startPt.y + 2 * (1 - T) * T * controlPt.y + Math.pow(T,2) * endPt.y;// eslint-disable-line
-    return ({ x, y });
-  }
 
   pushBalls = (imagesCoord) => {
     const balls = [];
-    const points = [];
-    for (let i = 0; i < imagesCoord.length; i += 1) {
-      if (i === 0) {
-        points.push({ x: imagesCoord[i].x, y: imagesCoord[i].y });
-      } else {
-        for (let j = 0; j < 50; j += 1) {
-          points.push(this.getQuadraticBezierXYatT(
-            { x: imagesCoord[i].curve.x1, y: imagesCoord[i].curve.y1 },
-            { x: imagesCoord[i].curve.x2, y: imagesCoord[i].curve.y2 },
-            { x: imagesCoord[i].x, y: imagesCoord[i].y },
-            j / 50,
-          ));
-        }
-      }
-    }
-    console.log(points);
     imagesCoord.forEach((point) => {
-      if (point.curve) {
-        balls.push(
-          new Ball(
-            Math.round(point.x), // eslint-disable-line
-            Math.round(point.y), // eslint-disable-line
-            point.curve,
-          ));
-      } else {
-        balls.push(
-          new Ball(
-            Math.round(point.x), // eslint-disable-line
-            Math.round(point.y), // eslint-disable-line
-          ));
-      }
+      balls.push(
+        new Ball(
+          Math.round(point[0]), // eslint-disable-line
+          Math.round(point[1]), // eslint-disable-line
+        ));
     });
-    console.log(balls);
     return balls;
   }
 
@@ -85,6 +54,25 @@ class RendererMorph extends React.Component {
   }
 
   connectDots = (dots, ctx) => {
+    ctx.beginPath();
+    for (let i = 0, jlen = dots.length; i <= jlen; ++i) { // eslint-disable-line
+      const p0 = dots[
+        i + 0 >= jlen
+          ? i + 0 - jlen // eslint-disable-line
+          : i + 0
+      ];
+      const p1 = dots[
+        i + 1 >= jlen
+          ? i + 1 - jlen // eslint-disable-line
+          : i + 1
+      ];
+      ctx.quadraticCurveTo(p0.x, p0.y, (p0.x + p1.x) * 0.5, (p0.y + p1.y) * 0.5);
+    }
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+  connectDots1 = (dots, ctx) => {
     ctx.beginPath();
     ctx.moveTo(dots[0].x, dots[0].y);
     for (let i = 1; i < dots.length; i += 1) { // eslint-disable-line
@@ -102,19 +90,53 @@ class RendererMorph extends React.Component {
     ctx.fill();
   }
 
+  simpleConnectDots = (balls, ctx) => {
+    ctx.beginPath();
+    ctx.moveTo(balls[0].x, balls[0].y);
+    balls.forEach((ball) => {
+      ctx.lineTo(ball.x, ball.y);
+      // ball.draw(ctx);
+    });
+
+    ctx.closePath();
+    ctx.stroke();
+    ctx.fill();
+  }
+
+  connectDotsBezier = (dots, ctx) => {
+    ctx.beginPath();
+    for (let i = 0, jlen = dots.length; i <= jlen; ++i) { // eslint-disable-line
+      const p0 = dots[
+        i + 0 >= jlen
+          ? i + 0 - jlen // eslint-disable-line
+          : i + 0
+      ];
+      const p1 = dots[
+        i + 1 >= jlen
+          ? i + 1 - jlen // eslint-disable-line
+          : i + 1
+      ];
+      ctx.quadraticCurveTo(p0.x, p0.y, (p0.x + p1.x) * 0.5, (p0.y + p1.y) * 0.5);
+    }
+    ctx.closePath();
+    ctx.fill();
+  }
+
   processingPoints = (pos) => {
     this.balls[0].forEach((ball, i) => {
-      ball.think(pos, i * 0);
+      ball.think(pos, i);
+      ball.draw(this.ctx);
     });
   }
 
   animate = () => {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.mouse.setPos(this.pos.x, this.pos.y);
-    this.balls.forEach((balls) => {
-      this.processingPoints(this.pos);
-      this.connectDots(balls, this.ctx);
-    });
+    // this.balls.forEach((balls) => {
+    this.processingPoints(this.pos);
+    this.connectDotsBezier(this.balls[0], this.ctx);
+    // });
+    this.mouse.draw(this.ctx);
     requestAnimationFrame(this.animate);
   }
 

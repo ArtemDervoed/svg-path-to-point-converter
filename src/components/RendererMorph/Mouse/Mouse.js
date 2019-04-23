@@ -10,7 +10,7 @@ export default class Mouse {
     //   this.x = e.clientX - rect.left;
     //   this.y = e.clientY - rect.top;
     // };
-    this.canvas.onmousemove = (e) => {
+    window.onmousemove = (e) => {
       this.x = e.clientX;
       this.y = e.clientY;
     };

@@ -10099,6 +10099,16 @@ supports-color@^6.1.0:
   dependencies:
     has-flag "^3.0.0"
 
+svg-path-parser@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/svg-path-parser/-/svg-path-parser-1.1.0.tgz#e16b4b39df0d2b0d39e8347db79fdda1453a6046"
+
+svg-path-to-polygons@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/svg-path-to-polygons/-/svg-path-to-polygons-0.1.0.tgz#c03a023f7c0b78f1212287b68b576922878d9755"
+  dependencies:
+    svg-path-parser "^1.1.0"
+
 svg-points@^6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/svg-points/-/svg-points-6.0.1.tgz#d9f60e1ef409051542b30f921207bc4497fed5ec"
