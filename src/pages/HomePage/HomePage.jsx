@@ -2,8 +2,8 @@
 import React, { Fragment } from 'react';
 import RendererMorph from '_components/RendererMorph';
 
-import { svgPathToPoints } from './svgPathToPoints';
-import { pathDataToPolys } from 'svg-path-to-polygons';
+// import { svgPathToPoints } from './svgPathToPoints';
+// import { pathDataToPolys } from 'svg-path-to-polygons';
 
 class HomePage extends React.PureComponent {
   constructor() {
@@ -19,6 +19,42 @@ class HomePage extends React.PureComponent {
     const x = Math.pow(1 - T, 2) * startPt.x + 2 * (1 - T) * T * controlPt.x + Math.pow(T, 2) * endPt.x;// eslint-disable-line
     const y = Math.pow(1 - T, 2) * startPt.y + 2 * (1 - T) * T * controlPt.y + Math.pow(T,2) * endPt.y;// eslint-disable-line
     return ({ x, y });
+  }
+
+  getPoints = (path) => {
+    const points = [];
+    for (let i = 0; i < 100; i += 1) {
+      const point = path.getPointAtLength((i / 100) * path.getTotalLength());
+      points.push([point.x, point.y]);
+    }
+    const center = this.getCenter(points);
+    const shiftedPoints = this.setOffsetFigure(points, center);
+    return shiftedPoints;
+  }
+
+  getCenter = (points) => {
+    let count = 0;
+    let allx = 0;
+    let ally = 0;
+    for (let i = 0; i < points.length; i += 1) {
+      allx += points[i][0];
+      ally += points[i][1];
+      count += 1;
+    }
+    return {
+      x: allx / count,
+      y: ally / count,
+    };
+  }
+
+  setOffsetFigure = (points, center) => {
+    const newPoints = points.map(point =>
+      [
+        point[0] - center.x,
+        point[1] - center.y,
+      ],
+    );
+    return newPoints;
   }
 
   handleLoad = (e) => {
@@ -42,33 +78,21 @@ class HomePage extends React.PureComponent {
     }
   }
 
-  convertBezierToPoints = (imagesCoord) => {
-    const points = [];
-    for (let i = 0; i < imagesCoord.length; i += 1) {
-      if (i === 0) {
-        points.push({ x: imagesCoord[i].x, y: imagesCoord[i].y });
-      } else {
-        for (let j = 0; j <= 10; j += 1) {
-          points.push(this.getQuadraticBezierXYatT(
-            { x: imagesCoord[i].curve.x1, y: imagesCoord[i].curve.y1 },
-            { x: imagesCoord[i].curve.x2, y: imagesCoord[i].curve.y2 },
-            { x: imagesCoord[i].x, y: imagesCoord[i].y },
-            j / 10,
-          ));
-        }
-      }
-    }
-    console.log(points);
-    return points;
+  handleNextForm = () => {
+    console.log(RendererMorph.nextForm());
   }
 
   handleSubmit = (e) => {
     e.preventDefault();
     const images = this.preview.childNodes;
-    let coordianates = [];
+    const coordianates = [];
     for (let i = 0; i < images.length; i += 1) {
       const svg = images[i].contentDocument.documentElement;
-      coordianates = pathDataToPolys(svgPathToPoints(svg, { tolerance: 5, decimals: 1 }));
+      for (let j = 0; j < svg.childNodes.length; j += 1) {
+        if (svg.childNodes[j].tagName && svg.childNodes[j].tagName === 'path') {
+          coordianates.push([this.getPoints(svg.childNodes[j])]);
+        }
+      }
     }
     this.setState({ imagesCoord: coordianates, render: true });
   }
