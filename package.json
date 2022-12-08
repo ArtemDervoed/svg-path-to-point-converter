@@ -244,7 +244,7 @@
     "compression": "^1.7.2",
     "connected-react-router": "^6.3.1",
     "cookie-parser": "^1.4.3",
-    "express": "^4.16.3",
+    "express": "^4.17.3",
     "gsap": "^2.1.2",
     "helmet": "^3.12.0",
     "history": "^4.9.0",
